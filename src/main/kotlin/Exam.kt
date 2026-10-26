@@ -9,6 +9,7 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.serialization.gson.gson
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.apache.poi.ss.formula.functions.Column
 import org.apache.poi.xwpf.usermodel.XWPFDocument
@@ -18,8 +19,8 @@ import java.io.FileOutputStream
 @Composable
 fun Exam() {
     // Пишите здесь основной код для выполнения вашего задания
-    var data by remember { mutableStateOf("данные") }
-    var result by remember { mutableStateOf("результат") }
+    var data by remember { mutableStateOf("") }
+    var result by remember { mutableStateOf("") }
 
     val scope = rememberCoroutineScope()
 
@@ -30,8 +31,12 @@ fun Exam() {
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedButton(
                 onClick = {
-                    scope.launch {
-                        data = data()
+                    scope.launch(Dispatchers.IO) {
+                        data = runCatching {
+                            data()
+                        }.getOrElse {
+                            it.localizedMessage
+                        }
                     }
                 },
                 modifier = Modifier.weight(1f).padding(12.dp)
@@ -58,14 +63,19 @@ fun Exam() {
 
 //** Средства получения данных **//
 // Клиент сетевого сервиса
-val client = {}
+val client = HttpClient {
+    install(ContentNegotiation) {
+        gson()
+    }
+}
 // Адрес страницы для получения данных
-const val URL = ""
+const val URL = "http://localhost:4444/TransferSimulator"
 // Класс данных для получения информации
-class Data
+class Data(
+    val value: String
+)
 // Функция для получения искомого значения
-suspend fun data() = "данные"
-
+suspend fun data() = client.get("$URL/email").body<Data>().value
 
 //** Средства проверки строки на правильность **//
 val regex = "".toRegex()
