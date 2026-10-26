@@ -78,8 +78,8 @@ class Data(
 suspend fun data() = client.get("$URL/email").body<Data>().value
 
 //** Средства проверки строки на правильность **//
-val regex = "".toRegex()
-fun check(s: String) = "результат"
+val regex = "[-.\\w]+@[-.\\w]+\\.[a-zA-Z]{2,6}".toRegex()
+fun check(s: String): String = if (regex.matches(s)) "Успешно" else "Не успешно"
 
 
 //** Средства записи результатов в файл **//
