@@ -86,4 +86,17 @@ fun check(s: String): String = if (regex.matches(s)) "Успешно" else "Не
 fun write(data: String, result: String) {
     val file = "ТестКейс.docx"
 
+    val document = FileInputStream(file).use {
+        XWPFDocument(it)
+    }
+    document.tables.first().createRow().apply {
+        getCell(0).text = data
+        createCell().text = "Электронная почта"
+        createCell().text = result
+    }
+    FileOutputStream(file).use {
+        document.write(it)
+    }
+
+    Runtime.getRuntime().exec("cmd /c $file")
 }
